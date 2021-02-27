@@ -1,0 +1,80 @@
+.LandingPageContainer {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    background: var(--blue-dark);
+}
+
+.backgroundLogoContainer {
+    display: flex;
+    
+    align-items: center;
+    flex: 1;
+}
+
+
+
+.loginContainer {
+    flex: 1;
+    
+    margin-top: 5%;
+    margin-bottom: 5%;
+
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    background: red;
+}
+
+.loginContainer header {
+    flex: 2;
+    width: 70%;
+}
+
+
+.loginContainer main {
+    flex: 2;
+    width: 70%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.loginContainer main > p {
+    font-family: Inter;
+    font-size: 2.25rem;
+    font-weight: 500;
+    color: var(--white)
+}
+.loginContainer main > div {
+    display: flex;
+    flex-direction: row;
+}
+
+
+.loginContainer > footer {
+    flex: 1;
+    width: 70%;
+
+    display: flex;
+}
+.loginContainer > footer input {
+    flex: 2;
+
+    height: 60%;
+}
+.loginContainer > footer button {
+    background: black;
+    flex: 1;
+    
+    height: auto;
+    width: auto;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.loginContainer > footer button img {
+    background: black;
+}

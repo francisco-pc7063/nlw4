@@ -1,7 +1,7 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction, useEffect } from 'react'
 import Cookies from 'js-cookie'
 
-import { HomeProps } from '../pages/index'
+import { HomeProps } from '../pages/Home/index'
 
 import challenges from '../../challenges.json'
 import { LevelUpModal } from '../components/LevelUpModal'
