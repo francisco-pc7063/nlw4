@@ -1,6 +1,10 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction, useEffect } from 'react'
+import Cookies from 'js-cookie'
+
+import { HomeProps } from '../pages/index'
 
 import challenges from '../../challenges.json'
+import { LevelUpModal } from '../components/LevelUpModal'
 
 interface challenge {
     type: string
@@ -17,28 +21,40 @@ export interface ChallengeInterface {
 }
 
 interface ChallengesContextData {
-    level: { level: number, levelUp: () => void },
+    level: { level: number, levelUp: () => void, isLevelUpModalOpen: boolean, setIsLevelUpModalOpen: (newValue: boolean) => void },
     experience: { currentExperience: number, levelExperience: (lvl?: number) => number },
     challenge: ChallengeInterface
 }
 
-interface ChallengesProviderProps {
+interface ChallengesProviderProps extends HomeProps {
     children: ReactNode
 }
 
 
 export const ChallengesContext = createContext({} as ChallengesContextData) 
 
-export function ChallengesProvider({ children }: ChallengesProviderProps){
-    const [ level, setLevel ] = useState(1)
-    const [ currentExperience, setCurrentExperience ] = useState(0)
-    const [ challengesCompleted, setChallengesCompleted ] = useState(0)
-    const [ activeChallenge, setActiveChallenge ]: [challenge | null, Dispatch<SetStateAction<challenge | null>>] = useState(null)
+export function ChallengesProvider({ children, ...props }: ChallengesProviderProps){
+    console.log("CHALLENGES PROVIDER", props)
 
-    //componentDidMount
+    const [ level, setLevel ] = useState(props.level ?? 1)
+    const [ currentExperience, setCurrentExperience ] = useState(props.currentExperience ?? 0)
+    const [ challengesCompleted, setChallengesCompleted ] = useState(props.challengesCompleted ?? 0)
+    const [ activeChallenge, setActiveChallenge ]: [challenge | null, Dispatch<SetStateAction<challenge | null>>] = useState(null)
+    const [ isLevelUpModalOpen, setIsLevelUpModalOpen ] = useState(false)
+
+    //ComponentDidMount
     useEffect(() => {
         Notification.requestPermission()
     }, [])
+
+    useEffect(() => {
+        Cookies.set('challengesCompleted', String(challengesCompleted))
+        Cookies.set('level', String(level))
+        Cookies.set('currentExperience', String(currentExperience))
+
+        console.log("useEffect("+ level, currentExperience, challengesCompleted +")")
+    }, [ level, challengesCompleted, currentExperience ])
+
 
     const levelExperience = (lvl?: number): number => {
         const lvlCalc = lvl || level + 1
@@ -49,6 +65,7 @@ export function ChallengesProvider({ children }: ChallengesProviderProps){
 
     function levelUp(): void {
         setLevel(level + 1)
+        setIsLevelUpModalOpen(true)
     }
 
     function startNewChallenge(): void {
@@ -87,7 +104,7 @@ export function ChallengesProvider({ children }: ChallengesProviderProps){
     }
 
     const challengesContextData:ChallengesContextData = {
-        level: { level, levelUp },
+        level: { level, levelUp, isLevelUpModalOpen, setIsLevelUpModalOpen },
         experience: { currentExperience, levelExperience },
         challenge: { activeChallenge, challengesCompleted, startNewChallenge, resetChallenge, completeChallenge }
     }
@@ -95,6 +112,7 @@ export function ChallengesProvider({ children }: ChallengesProviderProps){
     return(
         <ChallengesContext.Provider value={challengesContextData}>
             { children }
+            { isLevelUpModalOpen && <LevelUpModal /> }
         </ChallengesContext.Provider>
     )
 }
