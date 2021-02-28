@@ -3,7 +3,7 @@
     height: 100vh;
 
     display: flex;
-    background: var(--blue-dark);
+    background: var(--blue);
 }
 
 .backgroundLogoContainer {
@@ -18,17 +18,16 @@
 .loginContainer {
     flex: 1;
     
-    margin-top: 5%;
-    margin-bottom: 5%;
+    margin-top: 10%;
+    margin-bottom: 10%;
 
     display: flex;
     align-items: flex-start;
     flex-direction: column;
-    background: red;
 }
 
 .loginContainer header {
-    flex: 2;
+    flex: 1.7;
     width: 70%;
 }
 
@@ -39,7 +38,7 @@
 
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-evenly;
 }
 .loginContainer main > p {
     font-family: Inter;
@@ -51,30 +50,83 @@
     display: flex;
     flex-direction: row;
 }
+.loginContainer main > div > img {
+    margin-right: 1.25rem;
+}
+.loginContainer main > div > p {
+    font-size: 1.25rem;
+    max-width: 15.875rem;
+    font-weight: 500;
+    color: var(--text-blue)
+}
+
 
 
 .loginContainer > footer {
     flex: 1;
     width: 70%;
+    
+    border-radius: 0;
+}
+.loginContainer > footer > div{
+    flex: 1;
+    width: 70%;
+    
+    border-radius: 0;
 
     display: flex;
+    flex-direction: row;
 }
 .loginContainer > footer input {
-    flex: 2;
 
-    height: 60%;
+    width: 17rem;
+    height: 5rem;
+
+    padding-left: 0.75rem;
+    border: 0;
+    border-radius: 0;
+    border-top-left-radius: 0.4rem;
+    border-bottom-left-radius: 0.4rem;
+    background: linear-gradient(90deg, #4953B8 0%, rgba(73, 83, 184, 0.2) 100%);
+    color: var(--white)
 }
 .loginContainer > footer button {
-    background: black;
-    flex: 1;
+
+    font-size: 5rem;
+    font-weight: 500;
     
-    height: auto;
-    width: auto;
+    height: 5rem;
+    width: 5rem;
+
+    border: 0;
+    border-radius: 0;
+    border-top-right-radius: 0.4rem;
+    border-bottom-right-radius: 0.4rem;
 
     display: flex;
     justify-content: center;
     align-items: center;
 }
+.buttonDisabled{
+    background: var(--blue-dark);
+    cursor: not-allowed;
+}
+.buttonReady {
+    background: var(--green);
+    transition: filter 0.2s;
+}
+.buttonReady:hover {
+    filter: brightness(0.8);
+}
 .loginContainer > footer button img {
-    background: black;
+    border: inherit;
+    border-radius: inherit;
+}
+
+.error {
+    color: var(--red);
+    max-width: 23rem;
+    font-size: 1.25rem;
+    font-family: Inter;
+    font-weight: 500;
 }

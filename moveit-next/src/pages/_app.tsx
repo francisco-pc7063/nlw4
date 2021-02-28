@@ -1,8 +1,12 @@
+import { CookieProvider } from '../contexts/CookieContext'
 import '../styles/global.css'
+
 
 function MyApp({ Component, pageProps }) {
     return (
-        <Component {...pageProps} />
+        <CookieProvider>
+            <Component {...pageProps} />
+        </CookieProvider>
     )
 }
 

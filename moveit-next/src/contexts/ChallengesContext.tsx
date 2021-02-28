@@ -1,7 +1,7 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction, useEffect } from 'react'
 import Cookies from 'js-cookie'
 
-import { HomeProps } from '../pages/Home/index'
+import { ChallengeProviderInterface } from '../pages/Home/index'
 
 import challenges from '../../challenges.json'
 import { LevelUpModal } from '../components/LevelUpModal'
@@ -26,7 +26,7 @@ interface ChallengesContextData {
     challenge: ChallengeInterface
 }
 
-interface ChallengesProviderProps extends HomeProps {
+interface ChallengesProviderProps extends ChallengeProviderInterface {
     children: ReactNode
 }
 

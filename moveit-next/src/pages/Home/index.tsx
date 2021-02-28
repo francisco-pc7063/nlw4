@@ -10,17 +10,26 @@ import { ChallengeBox } from '../../components/ChallengeBox'
 import { ChallengesProvider } from '../../contexts/ChallengesContext'
 import { CountdownProvider } from '../../contexts/CountdownContext'
 
-import styles from '../styles/pages/Home.module.css'
+import styles from '../../styles/pages/Home.module.css'
 
-export interface HomeProps {
+
+export interface ChallengeProviderInterface {
     level: number
     currentExperience: number
     challengesCompleted: number
 }
 
-export default function Home(props) {
-    console.log("RECEIVING PROPS:", props)
+export interface ProfileProps {
+    userName: string
+    avatarUrl: string
+}
 
+export interface HomeProps extends ChallengeProviderInterface, ProfileProps {
+
+}
+
+
+export default function Home(props: HomeProps) {
     return (
         <ChallengesProvider
             level={props.level}
@@ -36,7 +45,7 @@ export default function Home(props) {
                 <CountdownProvider>
                     <section>
                         <div>
-                            <Profile />
+                            <Profile userName={props.userName} avatarUrl={props.avatarUrl}/>
                             <CompletedChallenges />
                             <CountDown />
                         </div>
@@ -51,14 +60,15 @@ export default function Home(props) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    let { level, currentExperience, challengesCompleted } = ctx.req.cookies
-
+    let { level, currentExperience, challengesCompleted, userData } = ctx.req.cookies
+    const { userName, avatarUrl } = JSON.parse(userData)
 
     level = (level === '0') ? '1' : level
-    console.log("getServerSideProps", level, currentExperience, challengesCompleted)
 
     return {
-        props: { 
+        props: {
+            userName,
+            avatarUrl,
             level: Number(level || 1),
             currentExperience: Number(currentExperience || 0),
             challengesCompleted: Number(challengesCompleted || 0)
