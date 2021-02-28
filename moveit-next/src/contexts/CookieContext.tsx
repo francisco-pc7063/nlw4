@@ -8,22 +8,27 @@ interface CookieProviderProps {
 
 interface UserDataApi {
     avatar_url: string
+    name: string
 }
 
 interface UserCookieData {
+    userLogin: string
     userName: string
     avatarUrl: string
 }
 
 class CookieContextData {
-    async setUser(userName: string): Promise<{ error: true, message: any } | { error: false, avatarUrl: string }>{
+    async setUser(userLogin: string): Promise<{ error: true, message: any } | { error: false, avatarUrl: string }>{
         try {
-            const response: AxiosResponse<UserDataApi> = await axios.get(`https://api.github.com/users/${userName}`)
+            const response: AxiosResponse<UserDataApi> = await axios.get(`https://api.github.com/users/${userLogin}`)
             const {
+                name,
                 avatar_url
             } = response.data
             console.log(response.data)
-            Cookies.set('userData', { userName, avatarUrl: avatar_url })
+            Cookies.set('userLogin', userLogin )
+            Cookies.set('userName', name )
+            Cookies.set('avatarUrl', avatar_url)
             return { error: false, avatarUrl: avatar_url }
         } catch(err) {
             console.log(err)
@@ -31,13 +36,21 @@ class CookieContextData {
         }
     }
 
-    getUser(){
-        const data = Cookies.get('userData')
-        console.log(data)
+    getUserData(){
+        let data: UserCookieData = {
+            userLogin: Cookies.get('userLogin'),
+            userName: Cookies.get('userName'),
+            avatarUrl: Cookies.get('avatarUrl')
+        }
+        return data
     }
 
     cleanUserCookie(){
-        Cookies.remove('userData')
+        Cookies.remove('userName')
+        Cookies.remove('avatarUrl')
+        Cookies.remove('level')
+        Cookies.remove('currentExperience')
+        Cookies.remove('challengesCompleted')
     }
 }
 

@@ -11,6 +11,9 @@ import { ChallengesProvider } from '../../contexts/ChallengesContext'
 import { CountdownProvider } from '../../contexts/CountdownContext'
 
 import styles from '../../styles/pages/Home.module.css'
+import { useContext, useEffect } from 'react'
+import { CookieContext } from '../../contexts/CookieContext'
+import router from 'next/router'
 
 
 export interface ChallengeProviderInterface {
@@ -30,6 +33,23 @@ export interface HomeProps extends ChallengeProviderInterface, ProfileProps {
 
 
 export default function Home(props: HomeProps) {
+    const cookieContext = useContext(CookieContext)
+
+    useEffect(() => {
+        if(!props.userName){
+            router.replace('/')
+            cookieContext.cleanUserCookie()
+        }
+        else if(!props.avatarUrl){
+            router.replace('/')
+            cookieContext.cleanUserCookie()
+        }
+        else if((typeof(props.userName) === 'string') && !props.avatarUrl){
+            console.log("Usuario logado!")
+        }
+    })
+
+    
     return (
         <ChallengesProvider
             level={props.level}
@@ -60,15 +80,13 @@ export default function Home(props: HomeProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    let { level, currentExperience, challengesCompleted, userData } = ctx.req.cookies
-    const { userName, avatarUrl } = JSON.parse(userData)
-
+    let { level, currentExperience, challengesCompleted, userName, avatarUrl } = ctx.req.cookies
+    console.log("COOKIES:", userName, avatarUrl)
     level = (level === '0') ? '1' : level
-
     return {
         props: {
-            userName,
-            avatarUrl,
+            userName: userName || null,
+            avatarUrl: avatarUrl || null,
             level: Number(level || 1),
             currentExperience: Number(currentExperience || 0),
             challengesCompleted: Number(challengesCompleted || 0)

@@ -7,14 +7,14 @@ import { GetServerSideProps } from 'next'
 
 import { HomeProps } from './Home'
 
-export default function LandingPage(props:HomeProps) {
+export default function LandingPage(props: HomeProps) {
     const cookieContext = useContext(CookieContext)
+    
     useEffect(() => {
-        if(!props.userName && !props.avatarUrl){
-            console.log("Rapaz, primeira opcao!")
-            
+        if(!props.userName){
+            cookieContext.cleanUserCookie()
         }
-        else if(!props.userName && (typeof(props.avatarUrl) === 'string')){
+        else if(!props.avatarUrl){
             cookieContext.cleanUserCookie()
         }
         else {
@@ -22,7 +22,7 @@ export default function LandingPage(props:HomeProps) {
         }
     }, [])
     
-    const [ userName, setUsername ] = useState('')
+    const [ userName, setUsername ] = useState(props.userName)
     const [ userFetchError, setUserFetchError ] = useState(false)
 
     function renderButton(){
@@ -101,15 +101,13 @@ export default function LandingPage(props:HomeProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    let { level, currentExperience, challengesCompleted, userData } = ctx.req.cookies
-    const { userName, avatarUrl } = JSON.parse(userData)
+    let { level, currentExperience, challengesCompleted, userName, avatarUrl } = ctx.req.cookies
 
     level = (level === '0') ? '1' : level
-
     return {
         props: {
-            userName,
-            avatarUrl,
+            userName: userName || null,
+            avatarUrl: avatarUrl || null,
             level: Number(level || 1),
             currentExperience: Number(currentExperience || 0),
             challengesCompleted: Number(challengesCompleted || 0)
