@@ -1,5 +1,52 @@
 .sideBarContainer {
     flex: 1;
-    background: red;
+
+    max-width: 120px;
+    margin-right: 20%;
     height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    
+    margin-top: 3.5rem;
+}
+.logo > img {
+    height: 3.5rem;
+}
+
+
+.menuOptions {
+    flex: 4;
+
+    margin-top: 4rem;
+}
+
+.menuOptions div {
+    display: flex;
+    margin-top: 3rem;
+    height: 2.7rem;
+    justify-content: center;
+}
+
+.menuOptions div button {
+    margin: 0;
+    border: 0;
+    height: inherit;
+    width: inherit;
+}
+
+
+.selected {
+    border-left: solid 0.27rem var(--white);
+    transition: border-color 0.4s;
+}
+.selected:hover {
+    border-color: var(--blue);
 }

@@ -88,7 +88,6 @@ export default function LandingPage(props: HomeProps) {
                             type="text"
                             autoFocus
                             placeholder="Digite o seu username"
-                            value={userName}
                             onChange={(value) => { setUsername(value.target.value) }}
                         />
                         {renderButton()}

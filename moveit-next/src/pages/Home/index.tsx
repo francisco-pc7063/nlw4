@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import router from 'next/router'
 import { GetServerSideProps } from 'next'
 
 import { CountDown } from '../../components/Countdown'
@@ -6,14 +7,15 @@ import { ExperienceBar } from '../../components/ExperienceBar'
 import { Profile } from '../../components/Profile'
 import { CompletedChallenges } from '../../components/CompletedChallenges'
 import { ChallengeBox } from '../../components/ChallengeBox'
+import { SideBar } from '../../components/SideBar'
 
 import { ChallengesProvider } from '../../contexts/ChallengesContext'
 import { CountdownProvider } from '../../contexts/CountdownContext'
+import { CookieContext } from '../../contexts/CookieContext'
 
 import styles from '../../styles/pages/Home.module.css'
 import { useContext, useEffect } from 'react'
-import { CookieContext } from '../../contexts/CookieContext'
-import router from 'next/router'
+
 
 
 export interface ChallengeProviderInterface {
@@ -56,24 +58,27 @@ export default function Home(props: HomeProps) {
             currentExperience={props.currentExperience}
             challengesCompleted={props.challengesCompleted}
         >
-            <div className={styles.container}>
-                <Head>
-                    <title>Inicio | move.it </title>
-                </Head>
+             <Head>
+                <title>Inicio | move.it </title>
+            </Head>
 
-                <ExperienceBar />
-                <CountdownProvider>
-                    <section>
-                        <div>
-                            <Profile userName={props.userName} avatarUrl={props.avatarUrl}/>
-                            <CompletedChallenges />
-                            <CountDown />
-                        </div>
-                        <div>
-                            <ChallengeBox />
-                        </div>  
-                    </section>
-                </CountdownProvider>
+            <div className={styles.container}>
+                <SideBar />
+                <div className={styles.homeContainer}>
+                    <ExperienceBar />
+                    <CountdownProvider>
+                        <section>
+                            <div>
+                                <Profile userName={props.userName} avatarUrl={props.avatarUrl}/>
+                                <CompletedChallenges />
+                                <CountDown />
+                            </div>
+                            <div>
+                                <ChallengeBox />
+                            </div>  
+                        </section>
+                    </CountdownProvider>
+                </div>
             </div>
         </ChallengesProvider>
     )

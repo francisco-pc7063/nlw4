@@ -1,6 +1,13 @@
 .container {
+    margin-right: 20%;
+    display: flex;
+    flex-direction: row;
+}
+
+.homeContainer {
+    flex: 6;
     height: 100vh;
-    width: 992px;
+    max-width: 992px;
     margin: 0 auto;
     padding: 2.5rem 2rem;
 
@@ -8,7 +15,7 @@
     flex-direction: column;
 }
 
-.container section {
+.homeContainer section {
     flex: 1;
 
     display: grid;
