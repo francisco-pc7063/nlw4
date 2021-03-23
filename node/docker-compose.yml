@@ -1,0 +1,11 @@
+version: '3.0'
+services:
+  pg:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: dev
+      POSTGRES_USER: nextleveluser
+      POSTGRES_PASSWORD: certainlyNotNextLevelPassword
+      LANG: en_US.utf8

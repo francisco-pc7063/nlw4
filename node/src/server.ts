@@ -1,3 +1,6 @@
+import 'reflect-metadata'
+import './database'
+
 import express, {Request, Response} from 'express'
 
 var app = express()
