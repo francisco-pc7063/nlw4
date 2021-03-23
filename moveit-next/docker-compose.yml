@@ -1,0 +1,49 @@
+version: '3.0'
+services:
+  pg:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: notNextLevelPassword
+      POSTGRES_USER: nextleveluser
+      POSTGRES_DB: dev
+      LANG: en_US.utf8
+  api:
+    build: ./backend/
+    volumes: 
+      - ./backend/:/opt/api
+    working_dir: /opt/api
+    ports:
+      - 3001:3001
+    environment:
+      NODE_PORT: 3001
+      NODE_ENV: development
+      POSTGRES_HOST: pg
+      POSTGRES_USER: nextleveluser
+      POSTGRES_PASSWORD: notNextLevelPassword
+      POSTGRES_DB: dev
+      JWT_SECRET: unsafe
+    command: "bash -c 'yarn install && yarn dev'"
+  next:
+    build: ./nextjs
+    volumes: 
+      - ./nextjs:/opt/next
+    working_dir: /opt/next
+    ports:
+      - 3000:3000
+    environment:
+      NODE_ENV: development
+      PUBLIC_URL: 'http://localhost:3000'
+      BACKEND_URL: 'http://api:3001/api/'
+    command: "bash -c 'yarn install && yarn dev'"
+  proxy:
+    build: ./reverse-proxy
+    ports:
+      - 80:80
+    environment:
+      SERVER_URL: "localhost"
+      FRONTEND_URI: "/"
+      FRONTEND_URL: "http://next:3000"
+      BACKEND_URI: "/api"
+      BACKEND_URL: "http://api:3001/api"
