@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import router from 'next/router'
 import { GetServerSideProps } from 'next'
 
 import { CountDown } from '../../components/Countdown'
@@ -14,7 +13,8 @@ import { CountdownProvider } from '../../contexts/CountdownContext'
 import { CookieContext } from '../../contexts/CookieContext'
 
 import styles from '../../styles/pages/Home.module.css'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
+import axios from 'axios'
 
 
 
@@ -36,21 +36,6 @@ export interface HomeProps extends ChallengeProviderInterface, ProfileProps {
 
 export default function Home(props: HomeProps) {
     const cookieContext = useContext(CookieContext)
-
-    useEffect(() => {
-        if(!props.userName){
-            router.replace('/')
-            cookieContext.cleanUserCookie()
-        }
-        else if(!props.avatarUrl){
-            router.replace('/')
-            cookieContext.cleanUserCookie()
-        }
-        else if((typeof(props.userName) === 'string') && !props.avatarUrl){
-            console.log("Usuario logado!")
-        }
-    })
-
     
     return (
         <ChallengesProvider
@@ -85,16 +70,34 @@ export default function Home(props: HomeProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    let { level, currentExperience, challengesCompleted, userName, avatarUrl } = ctx.req.cookies
-    console.log("COOKIES:", userName, avatarUrl)
-    level = (level === '0') ? '1' : level
+    console.log("/Home Query:", ctx.query)
+    const { code } = ctx.query
+
+    // Request login via access_token for server
+    let response: any
+    try {
+        response = await axios({
+            method: "GET",
+            url: `${process.env.BACKEND_URL}/auth/github/login`,
+            data: {
+                code,
+                userHeaders: ctx.req.headers
+            }
+        })
+        console.log("API RESPONSE", response.data)
+    } catch (err) {
+        response = { data: '' }
+        console.log(err)
+    }
+
+
     return {
         props: {
-            userName: userName || null,
-            avatarUrl: avatarUrl || null,
-            level: Number(level || 1),
-            currentExperience: Number(currentExperience || 0),
-            challengesCompleted: Number(challengesCompleted || 0)
+            userName: 'Francisco Pena',
+            avatarUrl: 'https://avatars.githubusercontent.com/u/54912223?v=4',
+            level: 1,
+            currentExperience:  0,
+            challengesCompleted: 0
         }
     }
     

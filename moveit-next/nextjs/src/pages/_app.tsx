@@ -1,4 +1,5 @@
 import { CookieProvider } from '../contexts/CookieContext'
+
 import '../styles/global.css'
 
 

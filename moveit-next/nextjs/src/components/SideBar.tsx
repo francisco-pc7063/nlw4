@@ -1,4 +1,3 @@
-import { route } from 'next/dist/next-server/server/router'
 import router from 'next/router'
 import { useEffect, useState } from 'react'
 
@@ -19,6 +18,11 @@ export function SideBar() {
         }
     }, [])
 
+    function selectRoute(newRoute: string) {
+        if(newRoute == router.pathname) return
+        else router.push(newRoute)
+    }
+
     return (
         <div className={styles.sideBarContainer}>
             <div className={styles.logo}>
@@ -26,12 +30,16 @@ export function SideBar() {
             </div>
             <div className={styles.menuOptions}>
                 <div className={styles.selected}>
-                    <button>
+                    <button
+                        onClick={() => selectRoute("Home")}
+                    >
                         <img src={`/icons/home${home}.svg`} alt="HomePage (selected)"/>
                     </button>
                 </div>
                 <div className={styles.selected}>
-                    <button >
+                    <button 
+                        onClick={() => selectRoute("Leaderboard")}
+                    >
                         <img src={`/icons/leaderboard${leaderboard}.svg`} alt="Leaderboard"/>
                     </button>
                 </div>
