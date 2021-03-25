@@ -3,7 +3,9 @@ import { Request, Response } from 'express'
 import knex from '../database/connection'
 import shell from 'shelljs'
 import jwt from 'jsonwebtoken'
+import cookieParser from 'cookie'
 
+const jwtSecret = process.env.JWT_SECRET
 
 function randomString(length: number) {
     var result = ''
@@ -23,51 +25,51 @@ class GithubOAuth2Controller {
 
 
     async createState(req: Request, res: Response){
-        let userHeaders = req.body.userHeaders || req.headers
+        const { userHeaders, userIp } = req.body
+        const headerData = userHeaders['user-agent'] + userHeaders['accept-encoding'] + userHeaders['accept-language']
+
         if(userHeaders === undefined) return res.status(400).json({ error: true, code: 400, message: "no client headers" })
     
 
-        const checksum = shell.exec(`echo "${userHeaders}" | md5sum | cut -d " " -f1`).stdout
+        const checksum = shell.exec(`echo "${headerData}" | md5sum | cut -d " " -f1`).stdout
         const state = randomString(150)
-        const data = await knex('moveit.users').select('id').where({
-            user_headers: checksum
-        })
-        if(data.length === 0){
-            await knex('moveit.users').insert({
-                state,
-                user_headers: checksum
-            })
-        }
-        else if(data.length === 1){
-            await knex('moveit.users').update({state}).where({ user_headers: checksum })
-        }
-        else {
-            return res.status(500).json({ error: true, code: 500, message: "Uknown error" })
-        }
+        
 
-        const token = jwt.sign({ userHeadersChecksum: checksum }, process.env.JWT_SECRET)
-
-        res.cookie('auth', token)
+        let userJwt = jwt.sign( { state, userHeaders: checksum, userIp }, jwtSecret)
         return res.status(200).json({
-            state
+            state,
+            jwt: userJwt,
         })
+    }
+
+    async resumeState(req: Request, res: Response){
+        let { cookie, userHeaders } = req.body
+        if(cookie == undefined || userHeaders == undefined) return res.status(400).json({ error: true, code: 400, message: "no client header OR cookie" })
+
+        let userCookie = cookieParser.parse(cookie)
+        let cookieData: any = jwt.verify(userCookie['JWT'], jwtSecret)
+        
+        return res.status(200).json({ state: cookieData.state })
     }
 
 
     async login(req: Request, res: Response){
-        const { code } = req.body
-        const userHeaders = req.headers
-        const checksum = shell.exec(`echo "${userHeaders}" | md5sum | cut -d " " -f1`).stdout
+        const { code, cookie, userHeaders, userIp } = req.body
 
-        const data = await knex('moveit.users').select("*").where({
-            user_headers: checksum
-        })
-        console.log("DATABASE:", data.length)
-        if(data.length === 0) return res.status(400).json({ error: true, code: 400, message: "Oops, something went wrong" })
-        else if (data.length > 1) return res.status(400).json({ error: true, code: 500, message: "You shall not pass" })
-        const { state  } = data[0]
+        const cookieData: any = jwt.verify(cookie['JWT'], jwtSecret)
+        const state = cookieData.state
+        const oldHeaders = cookieData.userHeaders
+        const oldIp = cookieData.userIp
 
+        const headerData = userHeaders['user-agent'] + userHeaders['accept-encoding'] + userHeaders['accept-language']
+        const checksum = shell.exec(`echo "${headerData}" | md5sum | cut -d " " -f1`).stdout
+
+        if(checksum !== oldHeaders) console.log("Different headers from JWT to current")
+        if(oldIp !== userIp) return console.log("Different ip from JWT to current")
         
+
+        if(state === undefined) return res.status(400).json({ error: true, code: 400, message: "No state" })
+        if(code === undefined) return res.status(400).json({ error: true, code: 400, message: "No code" })
 
 
         const response: AxiosResponse<any> = await axios({
@@ -80,18 +82,19 @@ class GithubOAuth2Controller {
                 client_id: process.env.GITHUB_CLIENT_ID,
                 client_secret: process.env.GITHUB_CLIENT_SECRET,
                 code,
-                state: state
+                state
             }
         })
-        const { access_token } = response.data
+        const { access_token, token_type } = response.data
         console.log("Got access_token")
 
-        await knex('moveit.users').update({
-            access_token: access_token
-        }).where({
-            state,
-            user_headers: checksum
-        })
+        const userId = await knex('moveit.users').insert({
+            access_token,
+            token_type
+        }).returning('id')
+        //await knex('moveit.session')
+
+
         return res.status(200).json({ error: true, code: 200, message: "You shall pass" })
     }
 }

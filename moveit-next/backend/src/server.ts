@@ -27,7 +27,6 @@ import express from "express"
 import cors from "cors"
 //import helmet from "helmet"
 import morgan from "morgan"
-import cookieParser from "cookie-parser"
 import HttpErrorMiddleware from './middleware/httpError'
 const httpErrorMiddleware = new HttpErrorMiddleware()
 
@@ -49,7 +48,6 @@ const app = express()
 //app.use(helmet())
 app.use(morgan('tiny'))
 app.use(cors())
-app.use(cookieParser())
 app.use(express.json())
 app.use(httpErrorMiddleware.defaultError)
 

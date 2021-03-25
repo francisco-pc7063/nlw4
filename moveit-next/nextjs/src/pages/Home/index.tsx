@@ -14,7 +14,7 @@ import { CookieContext } from '../../contexts/CookieContext'
 
 import styles from '../../styles/pages/Home.module.css'
 import { useContext } from 'react'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 
 
@@ -69,25 +69,31 @@ export default function Home(props: HomeProps) {
     )
 }
 
+import cookie from 'cookie'
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    console.log("/Home Query:", ctx.query)
     const { code } = ctx.query
+    let userCookie: any
+    try {
+        userCookie = cookie.parse(ctx.req.headers.cookie)
+    } catch (err) {
+        
+    }
 
     // Request login via access_token for server
     let response: any
     try {
         response = await axios({
-            method: "GET",
-            url: `${process.env.BACKEND_URL}/auth/github/login`,
+            method: "POST",
+            url: `${process.env.BACKEND_URL}auth/github/login`,
             data: {
+                cookie: userCookie,
                 code,
-                userHeaders: ctx.req.headers
+                userHeaders: ctx.req.headers,
+                userIp: ctx.req.headers['x-forwarded-for']
             }
         })
-        console.log("API RESPONSE", response.data)
     } catch (err) {
         response = { data: '' }
-        console.log(err)
     }
 
 
