@@ -24,6 +24,7 @@ services:
       POSTGRES_PASSWORD: notNextLevelPassword
       POSTGRES_DB: dev
       JWT_SECRET: unsafe
+      CORS: "*"
     command: "bash -c 'yarn install && yarn dev'"
   next:
     build: ./nextjs

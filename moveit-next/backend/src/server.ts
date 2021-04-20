@@ -47,7 +47,13 @@ const app = express()
 
 //app.use(helmet())
 app.use(morgan('tiny'))
-app.use(cors())
+app.use(cors({
+    origin: [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost"
+    ]
+}))
 app.use(express.json())
 app.use(httpErrorMiddleware.defaultError)
 

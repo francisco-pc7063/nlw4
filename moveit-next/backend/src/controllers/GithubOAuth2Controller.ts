@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
 import { Request, Response } from 'express'
 import knex from '../database/connection'
-import shell from 'shelljs'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie'
 
@@ -25,17 +24,10 @@ class GithubOAuth2Controller {
 
 
     async createState(req: Request, res: Response){
-        const { userHeaders, userIp } = req.body
-        const headerData = userHeaders['user-agent'] + userHeaders['accept-encoding'] + userHeaders['accept-language']
-
-        if(userHeaders === undefined) return res.status(400).json({ error: true, code: 400, message: "no client headers" })
-    
-
-        const checksum = shell.exec(`echo "${headerData}" | md5sum | cut -d " " -f1`).stdout
         const state = randomString(150)
         
 
-        let userJwt = jwt.sign( { state, userHeaders: checksum, userIp }, jwtSecret)
+        let userJwt = jwt.sign( { state }, jwtSecret)
         return res.status(200).json({
             state,
             jwt: userJwt,
@@ -43,8 +35,8 @@ class GithubOAuth2Controller {
     }
 
     async resumeState(req: Request, res: Response){
-        let { cookie, userHeaders } = req.body
-        if(cookie == undefined || userHeaders == undefined) return res.status(400).json({ error: true, code: 400, message: "no client header OR cookie" })
+        let { cookie } = req.body
+        if(cookie == undefined) return res.status(400).json({ error: true, code: 400, message: "no client header OR cookie" })
 
         let userCookie = cookieParser.parse(cookie)
         let cookieData: any = jwt.verify(userCookie['JWT'], jwtSecret)
@@ -54,24 +46,22 @@ class GithubOAuth2Controller {
 
 
     async login(req: Request, res: Response){
-        const { code, cookie, userHeaders, userIp } = req.body
-
-        const cookieData: any = jwt.verify(cookie['JWT'], jwtSecret)
-        const state = cookieData.state
-        const oldHeaders = cookieData.userHeaders
-        const oldIp = cookieData.userIp
-
-        const headerData = userHeaders['user-agent'] + userHeaders['accept-encoding'] + userHeaders['accept-language']
-        const checksum = shell.exec(`echo "${headerData}" | md5sum | cut -d " " -f1`).stdout
-
-        if(checksum !== oldHeaders) console.log("Different headers from JWT to current")
-        if(oldIp !== userIp) return console.log("Different ip from JWT to current")
+        const { code, state } = req.body
+        
+        console.log(req.headers)
+        console.log(req.headers.cookie)
+        const cookies = cookieParser.parse(req.headers.cookie)
+        //console.log(cookies)
+        const jwtData: any = jwt.verify(cookies['JWT'], jwtSecret)
+        //console.log(jwtData)
+        const stateJwt = jwtData.state
+        //console.log(code)
         
 
         if(state === undefined) return res.status(400).json({ error: true, code: 400, message: "No state" })
         if(code === undefined) return res.status(400).json({ error: true, code: 400, message: "No code" })
 
-
+        
         const response: AxiosResponse<any> = await axios({
             method: "POST",
             url: "https://github.com/login/oauth/access_token",
@@ -86,16 +76,51 @@ class GithubOAuth2Controller {
             }
         })
         const { access_token, token_type } = response.data
-        console.log("Got access_token")
+        if(access_token === undefined) return res.status(400).json({ error: true, code: 400, message: "Unable to generate token" })
+        if(token_type === undefined) return res.status(400).json({ error: true, code: 400, message: "No token type" })
 
-        const userId = await knex('moveit.users').insert({
-            access_token,
-            token_type
-        }).returning('id')
-        //await knex('moveit.session')
+        axios({
+            method: "GET",
+            url: "https://api.github.com/user",
+            headers: {
+                Accept: 'application/json',
+                Authorization: `token ${access_token}`
+            }
+        }).then(async (response) => {
+            //console.log(response.data)
+            const githubId = response.data['id']
+            const avatarUrl = response.data['avatar_url']
+            const apiUrl = response.data['url']
+            const htmlUrl = response.data['html_url']
+            try {
+                await knex.raw(`
+                        insert into moveit."user"(githubId, avatarurl, apiUrl, htmlUrl)
+                        values(?, ?, ?, ?);
+                    `, [githubId, avatarUrl, apiUrl, htmlUrl])
+            } catch(err) {
+                console.log(err)
+                return res.status(500).json({ error: true, code: 500, message: "Server Error" })
+            }
+            try {
+                await knex.raw(`
+                    INSERT INTO moveit."session"
+                    (user_id, access_token, token_type)
+                    VALUES(?, ?, ?);
+                `, [githubId, access_token, token_type])
+            } catch(err) {
+                console.log(err)
+                return res.status(500).json({ error: true, code: 500, message: "Server Error" })
+            }
 
 
-        return res.status(200).json({ error: true, code: 200, message: "You shall pass" })
+            let userJwt = jwt.sign( { oauth: "GITHUB", githubId }, jwtSecret)
+
+            return res.status(200).cookie("JWT", userJwt).json({
+                redirectUrl: '/Home',
+                redirectMsg: 'Successful',
+                error: false, code: 200, message: "You shall pass"
+            })
+        })
     }
 }
 

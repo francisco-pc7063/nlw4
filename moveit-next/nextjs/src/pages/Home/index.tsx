@@ -29,7 +29,7 @@ export interface ProfileProps {
     avatarUrl: string
 }
 
-export interface HomeProps extends ChallengeProviderInterface, ProfileProps {
+export interface HomeProps extends ProfileProps {
 
 }
 
@@ -39,9 +39,9 @@ export default function Home(props: HomeProps) {
     
     return (
         <ChallengesProvider
-            level={props.level}
-            currentExperience={props.currentExperience}
-            challengesCompleted={props.challengesCompleted}
+            level={1}
+            currentExperience={0}
+            challengesCompleted={0}
         >
              <Head>
                 <title>Inicio | move.it </title>
@@ -49,6 +49,7 @@ export default function Home(props: HomeProps) {
 
             <div className={styles.container}>
                 <SideBar />
+                
                 <div className={styles.homeContainer}>
                     <ExperienceBar />
                     <CountdownProvider>
@@ -64,46 +65,20 @@ export default function Home(props: HomeProps) {
                         </section>
                     </CountdownProvider>
                 </div>
+                
             </div>
         </ChallengesProvider>
     )
 }
 
-import cookie from 'cookie'
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const { code } = ctx.query
-    let userCookie: any
-    try {
-        userCookie = cookie.parse(ctx.req.headers.cookie)
-    } catch (err) {
-        
-    }
 
-    // Request login via access_token for server
-    let response: any
-    try {
-        response = await axios({
-            method: "POST",
-            url: `${process.env.BACKEND_URL}auth/github/login`,
-            data: {
-                cookie: userCookie,
-                code,
-                userHeaders: ctx.req.headers,
-                userIp: ctx.req.headers['x-forwarded-for']
-            }
-        })
-    } catch (err) {
-        response = { data: '' }
-    }
-
+    
 
     return {
         props: {
             userName: 'Francisco Pena',
-            avatarUrl: 'https://avatars.githubusercontent.com/u/54912223?v=4',
-            level: 1,
-            currentExperience:  0,
-            challengesCompleted: 0
+            avatarUrl: 'https://avatars.githubusercontent.com/u/54912223?v=4'
         }
     }
     

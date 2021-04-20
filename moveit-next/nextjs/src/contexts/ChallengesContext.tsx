@@ -48,11 +48,7 @@ export function ChallengesProvider({ children, ...props }: ChallengesProviderPro
     }, [])
 
     useEffect(() => {
-        Cookies.set('challengesCompleted', String(challengesCompleted))
-        Cookies.set('level', String(level))
-        Cookies.set('currentExperience', String(currentExperience))
-
-        console.log("useEffect("+ level, currentExperience, challengesCompleted +")")
+        
     }, [ level, challengesCompleted, currentExperience ])
 
 

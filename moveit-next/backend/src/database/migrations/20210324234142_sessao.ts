@@ -5,12 +5,11 @@ export async function up(knex: Knex): Promise<void> {
     return await knex.raw(`
         CREATE TABLE moveit."session" (
             id serial NOT NULL,
-            user_id int,
-            user_headers varchar(33),
-            state varchar(150) NOT NULL,
-            ip varchar(40) NOT NULL,
+            user_id int8 NOT NULL,
+            access_token varchar(300),
+            token_type varchar(50),
             CONSTRAINT session_pk PRIMARY KEY (id),
-            CONSTRAINT session_fk FOREIGN KEY (user_id) REFERENCES moveit.users(id) ON DELETE CASCADE ON UPDATE CASCADE
+            CONSTRAINT session_fk FOREIGN KEY (user_id) REFERENCES moveit."user"(githubId) ON DELETE CASCADE ON UPDATE CASCADE
         );    
     `)
 }

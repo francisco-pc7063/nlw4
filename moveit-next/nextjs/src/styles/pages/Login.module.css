@@ -1,0 +1,10 @@
+.loginContainer {
+    background-color: var(--background);
+    display: flex;
+    height: 100vh;
+}
+.loginContainer > img {
+    margin-left: 10%;
+    width: 30%;
+    align-self: center;
+}

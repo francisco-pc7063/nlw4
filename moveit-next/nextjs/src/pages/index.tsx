@@ -12,10 +12,6 @@ interface LandingPageProps {
 }
 
 export default function LandingPage(props: LandingPageProps) {
-    const router = useRouter()
-    const queryData = router.query
-    const cookieContext = useContext(CookieContext)
-
     return (
         <div className={styles.LandingPageContainer}>
             <div className={styles.backgroundLogoContainer}>
@@ -70,8 +66,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                 url: `${backendUrl}auth/github/state`,
                 data: {
                     cookie: ctx.req.headers.cookie,
-                    userHeaders: ctx.req.headers,
-                    userIp: ctx.req.headers['x-forwarded-for']
                 }
             })
         } catch (err) {
@@ -83,8 +77,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                 method: 'POST',
                 url: `${backendUrl}auth/github/state`,
                 data: {
-                    userHeaders: ctx.req.headers,
-                    userIp: ctx.req.headers['x-forwarded-for']
                 }
             })
             const jwt = response.data.jwt
